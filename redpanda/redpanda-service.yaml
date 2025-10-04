@@ -54,10 +54,10 @@ spec:
           - redpanda
           - start
           - --overprovisioned
-          - --node-id 0
+          - --node-id=0
           # Define internal and external listeners (using container IP)
-          - --kafka-addr PLAINTEXT://0.0.0.0:29092
-          - --advertise-kafka-addr PLAINTEXT://redpanda-service:29092
+          - --kafka-addr=PLAINTEXT://0.0.0.0:29092
+          - --advertise-kafka-addr=PLAINTEXT://redpanda-service:29092
         resources:
           requests:
             cpu: "50m"
