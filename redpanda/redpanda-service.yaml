@@ -45,6 +45,7 @@ spec:
       containers:
       - name: redpanda
         image: redpanda:latest
+        imagePullPolicy: Never
         ports:
           - containerPort: 29092
           - containerPort: 8081

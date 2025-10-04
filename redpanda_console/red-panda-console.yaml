@@ -33,6 +33,7 @@ spec:
       containers:
       - name: console
         image: redpanda-console:latest
+        imagePullPolicy: Never
         ports:
           - containerPort: 8080
         env:
