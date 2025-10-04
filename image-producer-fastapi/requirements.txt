@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+aiokafka
+python-multipart # Required for handling file uploads (UploadFile)
+google-cloud-storage

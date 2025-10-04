@@ -1,0 +1,52 @@
+# --- Kubernetes Deployment for GCS Emulator ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gcs-emulator-deployment
+  labels:
+    app: gcs-emulator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gcs-emulator
+  template:
+    metadata:
+      labels:
+        app: gcs-emulator
+    spec:
+      containers:
+      - name: gcs-emulator
+        # Use the image you built from the Dockerfile above, or the base image directly.
+        # If building locally, replace 'oittaa/gcp-storage-emulator:latest' with your image name.
+        image: oittaa/gcp-storage-emulator:latest 
+        ports:
+        - containerPort: 9023 # The default port for the emulator
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "64Mi"
+          limits:
+            cpu: "250m"
+            memory: "128Mi"
+        # The emulator does not require any custom environment variables, 
+        # as the client services (FastAPI/Image Processor) point to it.
+
+---
+
+# --- Kubernetes Service for GCS Emulator ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gcs-emulator-service # THIS NAME IS CRITICAL for client configuration
+  labels:
+    app: gcs-emulator
+spec:
+  selector:
+    app: gcs-emulator
+  ports:
+    - protocol: TCP
+      port: 9023 # The service port
+      targetPort: 9023 # The container port
+  # ClusterIP ensures this is only accessible internally within the Kubernetes cluster
+  type: ClusterIP

@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-producer-service
+  labels:
+    app: image-producer
+spec:
+  selector:
+    app: image-producer
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: LoadBalancer # Expose API externally
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-producer-deployment
+  labels:
+    app: image-producer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: image-producer
+  template:
+    metadata:
+      labels:
+        app: image-producer
+    spec:
+      containers:
+      - name: image-producer
+        image: image-producer-fastapi:latest # Placeholder image name from your compose file
+        imagePullPolicy: Never
+        ports:
+          - containerPort: 8000
+        command: ["uvicorn"]
+        args: ["server:app", "--host", "0.0.0.0", "--port", "8000"]
+        env:
+          - name: REDPANDA_BROKERS
+            value: "redpanda-service:29092"
+          - name: INPUT_TOPIC
+            value: "image_uploads"
+          - name: OUTPUT_TOPIC
+            value: "image_responses"
+          - name: STORAGE_EMULATOR_HOST
+            value: "http://gcs-emulator-service:9023" # GC Emulator service URL
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "32Mi"
+          limits:
+            cpu: "100m"
+            memory: "64Mi"

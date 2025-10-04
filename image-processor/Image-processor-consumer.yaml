@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-processor-deployment
+  labels:
+    app: image-processor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: image-processor
+  template:
+    metadata:
+      labels:
+        app: image-processor
+    spec:
+      containers:
+      - name: image-processor
+        image: image-processor:latest # Placeholder image name from your compose file
+        imagePullPolicy: Never
+        # Runs the python script continuously
+        command: ["python"]
+        args: ["image-service.py"]
+        env:
+          - name: REDPANDA_BROKERS
+            value: "redpanda-service:29092"
+          - name: INPUT_TOPIC
+            value: "image_uploads"
+          - name: OUTPUT_TOPIC
+            value: "image_responses"
+          - name: STORAGE_EMULATOR_HOST
+            value: "http://gcs-emulator-service:9023" # GC Emulator service URL
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "32Mi"
+          limits:
+            cpu: "100m"
+            memory: "64Mi"

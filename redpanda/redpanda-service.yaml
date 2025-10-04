@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redpanda-service
+  labels:
+    app: redpanda
+spec:
+  selector:
+    app: redpanda
+  ports:
+    # Internal Kafka broker port (used by consumer/producer apps)
+    - name: kafka-internal
+      protocol: TCP
+      port: 29092
+      targetPort: 29092
+    # Schema Registry
+    - name: schema-registry
+      protocol: TCP
+      port: 8081
+      targetPort: 8081
+    # Admin API
+    - name: admin-api
+      protocol: TCP
+      port: 9644
+      targetPort: 9644
+  type: ClusterIP # Internal only access
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redpanda-deployment
+  labels:
+    app: redpanda
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redpanda
+  template:
+    metadata:
+      labels:
+        app: redpanda
+    spec:
+      containers:
+      - name: redpanda
+        image: docker.redpanda.com/redpandadata/redpanda:latest
+        ports:
+          - containerPort: 29092
+          - containerPort: 8081
+          - containerPort: 9644
+        command:
+          - redpanda
+          - start
+          - --overprovisioned
+          - --node-id 0
+          # Define internal and external listeners (using container IP)
+          - --kafka-addr PLAINTEXT://0.0.0.0:29092
+          - --advertise-kafka-addr PLAINTEXT://redpanda-service:29092
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "32Mi"
+          limits:
+            cpu: "100m"
+            memory: "64Mi"
