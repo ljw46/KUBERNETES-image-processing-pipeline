@@ -68,7 +68,7 @@ echo "--- 4. Applying Kubernetes Manifests (Using 'minikube kubectl --') ---"
 
 # 3.1 Deploy Redpanda Broker and Service
 echo "Applying Redpanda Service..."
-minikube kubectl -- apply -f redpanda/red-panda-service.yaml
+minikube kubectl -- apply -f redpanda/redpanda-service.yaml
 
 # 3.2 Deploy GCP Storage Emulator
 echo "Applying GCP Storage Emulator..."

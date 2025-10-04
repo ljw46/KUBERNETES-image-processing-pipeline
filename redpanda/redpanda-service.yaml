@@ -44,7 +44,7 @@ spec:
     spec:
       containers:
       - name: redpanda
-        image: docker.redpanda.com/redpandadata/redpanda:latest
+        image: redpanda:latest
         ports:
           - containerPort: 29092
           - containerPort: 8081

@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
       - name: console
-        image: docker.redpanda.com/redpandadata/console:latest
+        image: redpanda-console:latest
         ports:
           - containerPort: 8080
         env:
