@@ -54,12 +54,17 @@ spec:
           - redpanda
           - start
           - --overprovisioned
-          - --node-id=0
-          # Define internal and external listeners (using container IP)
-          - --kafka-addr=PLAINTEXT://0.0.0.0:29092
-          - --advertise-kafka-addr=PLAINTEXT://redpanda-service:29092
-          - --schema-registry-listeners=http://0.0.0.0:8081
-          - --admin-listeners=http://0.0.0.0:9644
+        env:
+          - name: RPK_BROKER_ID
+            value: "0"
+          - name: RPK_ADVERTISE_KAFKA_ADDR
+            value: "redpanda-service:29092"
+          - name: RPK_KAFKA_ADDR
+            value: "PLAINTEXT://0.0.0.0:29092"
+          - name: RPK_SCHEMA_REGISTRY_LISTENERS
+            value: "http://0.0.0.0:8081"
+          - name: RPK_ADMIN_LISTENERS
+            value: "http://0.0.0.0:9644"
         resources:
           requests:
             cpu: "50m"
