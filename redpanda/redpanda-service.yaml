@@ -49,11 +49,17 @@ spec:
       - name: redpanda
         image: redpanda:latest
         imagePullPolicy: Never
-        command: ["/bin/bash"]
+        command:
+          - /usr/bin/rpk
+          - redpanda
+          - start
         args:
-          # Use rpk to start Redpanda. This handles configuration more robustly.
-          - "-c"
-          - "rpk redpanda start --config /etc/redpanda/redpanda.yaml" # rpk uses the config file correctly
+          - "--config"
+          - "/etc/redpanda/redpanda.yaml"
+          - "--overprovisioned" # TELLS REDPANDA IT'S IN A VM/K8S
+          - "--check=false"      # DISABLES CERTAIN SYSTEM CHECKS
+          - "--smp"
+          - "1"  # Limits Redpanda to 1 CPU core to match your limits
         ports:
           - containerPort: 29092
           - containerPort: 8081
@@ -82,7 +88,7 @@ spec:
             # NOTE: 'rpk start' assumes the config is in /etc/redpanda/redpanda.yaml
         volumeMounts:
         - name: redpanda-config-volume
-          mountPath: /etc/redpanda/redpanda.yaml
+          mountPath: /tmp/redpanda.yaml
           subPath: redpanda.yaml
           
       # Volume definition for the ConfigMap

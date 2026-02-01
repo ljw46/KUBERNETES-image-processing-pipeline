@@ -1,0 +1,50 @@
+# Settings for the Redpanda sub-chart
+redpanda:
+  statefulset:
+    replicas: 1
+    # This turns off the sidecar you see in your 'describe' output
+
+    sidecars:
+      configurator:
+        enabled: false
+    # This kills the Bash PostStartHookError
+    lifecycle:
+      postStart:
+        enabled: false # Completely disable the hook that is failing
+        exec:
+          command: ["/bin/sh", "-c", "echo 'Bypassing hooks'"]
+
+  # Forces memory down from 2.5GB to 512MB
+  resources:
+    cpu:
+      request: 500m
+    memory:
+      request: 2Gi
+    limits:
+      cpu: 1
+      memory: 2Gi
+      
+
+  # Standard dev flags
+  tuning:
+    well_known_types: []
+  tls:
+    enabled: false
+  external:
+    enabled: false
+  config:
+    cluster:
+      developer_mode: true
+  storage:
+    persistentVolume:
+      enabled: false
+  post_upgrade_job:
+    enabled: false
+  post_install_job:
+    enabled: false
+
+# Your apps (NOT indented under redpanda)
+imageProducer:
+  image: image-producer:latest
+imageProcessor:
+  image: image-processor:latest

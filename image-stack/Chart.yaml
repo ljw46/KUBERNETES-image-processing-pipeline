@@ -1,0 +1,11 @@
+apiVersion: v2
+name: image-stack
+description: Full Image Processing Stack
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+dependencies:
+  - name: redpanda
+    version: 5.10.7
+    repository: https://charts.redpanda.com/
