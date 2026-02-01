@@ -42,33 +42,54 @@ spec:
       labels:
         app: redpanda
     spec:
+      # FIX: Apply Security Context to allow Redpanda to write to its data directory
+      securityContext:
+        fsGroup: 1000 # Ensures volume permissions match the Redpanda user
       containers:
       - name: redpanda
         image: redpanda:latest
         imagePullPolicy: Never
+        command: ["/bin/bash"]
+        args:
+          # Use rpk to start Redpanda. This handles configuration more robustly.
+          - "-c"
+          - "rpk redpanda start --config /etc/redpanda/redpanda.yaml" # rpk uses the config file correctly
         ports:
           - containerPort: 29092
           - containerPort: 8081
           - containerPort: 9644
-        command:
-          - redpanda
-          - start
-          - --overprovisioned
         env:
-          - name: RPK_BROKER_ID
-            value: "0"
-          - name: RPK_ADVERTISE_KAFKA_ADDR
-            value: "redpanda-service:29092"
-          - name: RPK_KAFKA_ADDR
-            value: "PLAINTEXT://0.0.0.0:29092"
-          - name: RPK_SCHEMA_REGISTRY_LISTENERS
-            value: "http://0.0.0.0:8081"
-          - name: RPK_ADMIN_LISTENERS
-            value: "http://0.0.0.0:9644"
+          # Configuration for Redpanda Broker Listeners (Listening on all interfaces)
+          - name: REDPANDA_OVERRIDE_kafka_api_address
+            value: "0.0.0.0:29092"
+          - name: REDPANDA_OVERRIDE_admin_api_address
+            value: "0.0.0.0:9644"
+          - name: REDPANDA_OVERRIDE_schema_registry_address
+            value: "0.0.0.0:8081"
+          - name: REDPANDA_OVERRIDE_rpc_server
+            value: "0.0.0.0:33145"
+            
+          # Configuration for Advertised Listener (CRITICAL for K8s Service Discovery)
+          - name: REDPANDA_OVERRIDE_kafka_api_advertised_address
+            value: "redpanda-service:29092"     
         resources:
           requests:
-            cpu: "50m"
-            memory: "32Mi"
-          limits:
             cpu: "100m"
-            memory: "64Mi"
+            memory: "512Mi"
+          limits:
+            cpu: "200m"
+            memory: "1Gi"
+            # NOTE: 'rpk start' assumes the config is in /etc/redpanda/redpanda.yaml
+        volumeMounts:
+        - name: redpanda-config-volume
+          mountPath: /etc/redpanda/redpanda.yaml
+          subPath: redpanda.yaml
+          
+      # Volume definition for the ConfigMap
+      volumes:
+      - name: redpanda-config-volume
+        configMap:
+          name: redpanda-config
+      - name: redpanda-data-volume
+        emptyDir: {} # Ephemeral storage for data, required for write permissions
+
